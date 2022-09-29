@@ -1,77 +1,87 @@
 import pandas as pd
-import pyodbc
+
+from app.daatabase.connection import conn_db
 
 
 def connect_db(research_dict):
-    driver = "ODBC Driver 17 for SQL Server"
-    server = "172.17.7.158,1433"
-
-    # 접속 유저
-    user = "vass_access"
-
-    # 패스워드
-    password = "password1!"
-
-    # 데이터베이스명
-    db = "VASS_DATA"
-
-    cnxn = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server + ';DATABASE=' + db + ';UID=' + user + ';PWD=' + password)
-    # cursor = cnxn.cursor()
-
-    # table create
-
-    # create result
-    # check create
-    # study design run code
-
-    # scri
-    # web db : 지정할수있어 디비저장
-
-    # db > web db
-
-    # dictionary reading
+    # dictionary reading: 연구디자인 페이지에서 각 항목을 클릭했을 때 나오는 딕셔너리들 중 일부를 불러옵니다.
     use_start_date = int(research_dict['use_start_date'])
     use_end_date = int(research_dict['use_end_date'])
     research_start_date = int(research_dict['research_start_date'])
     research_end_date = int(research_dict['research_end_date'])
+    vcncd = int(research_dict['vaccine_target_id'])  # 백신종류
+    vcntme = int(research_dict['vcntime'])  # 백신차수
 
-    table_HOI = 'SELECT * FROM dbo.example'
-    table_HOI = pd.read_sql(table_HOI, cnxn)
-    print('Table_HOI')
+    # 조작적 정의 DB 연결
+    research_cnxn = conn_db('')
+    data_cnxn = conn_db('')
 
-    vac = ('SELECT * FROM dbo.vcn2 where VCNYMD between {} and {}'.format(research_start_date, research_end_date))
-    vac = pd.read_sql(vac, cnxn)
+    with research_cnxn:
+        table_HOI = 'SELECT * FROM dbo.example'  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
+        table_HOI = pd.read_sql(table_HOI, research_cnxn)
+        print('Table_HOI')
 
-    print('vac')
+    with data_cnxn:
+        # 접종데이터 상의 VCNCD를 vaccine target 테이블의 VCNCD로 맞춰주는 작업
+        vac_mapping = ('SELECT * FROM dbo.vcn_map where VaccineTargetID={}'.format(vcncd))
+        vac_mapping = pd.read_sql(vac_mapping, data_cnxn)
+        vac_mapping = vac_mapping.VCNCD.tolist()
+        vac_mapping = list(map(int, vac_mapping))
 
-    bfc = ('SELECT * from dbo.BNC where birthdate between {} and {}'.format(use_start_date, use_end_date))
-    bfc = pd.read_sql(bfc, cnxn)
-    print('bfc')
+        vac = ('SELECT * FROM dbo.vcn2 where VCNYMD between {} and {}'.format(research_start_date, research_end_date))
+        # vac = ('SELECT * FROM dbo.vcn2')
+        vac = pd.read_sql(vac, data_cnxn)
 
-    table20 = (
-        'SELECT * from dbo.T20 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date))
-    table20 = pd.read_sql(table20, cnxn)
-    HOI_patients_rnkey = table20.RN_KEY.tolist()
-    print('table20')
+        # vac_mapping에 있는 값이 들어있는 기록만 추출한 후, 차수 만족하는 기록만 추출함
+        vac = vac[vac['VCNCD'].isin(vac_mapping)]
 
-    table30 = (
-        'SELECT * from dbo.T30 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date))
-    table30 = pd.read_sql(table30, cnxn)
-    table30 = table30[table30.RN_KEY.isin(HOI_patients_rnkey)]
-    print('table30')
+        # 인플루엔자는 VCNTME을 전부 1로 수정
+        vac.loc[vac.VCNCD == 901, 'VCNTME'] = 1
+        vac.loc[vac.VCNCD == 902, 'VCNTME'] = 1
 
-    table60 = ('SELECT * from dbo.T60 where left(MDCARE_STRT_DT,8) between {} and {}'.format(research_start_date,
-                                                                                             research_end_date))
-    table60 = pd.read_sql(table60, cnxn)
-    table60 = table60[table60.RN_KEY.isin(HOI_patients_rnkey)]
-    print('table60')
+        # Tdap, Td는 VCNTME을 6으로 수정
+        vac.loc[vac.VCNCD == 306, 'VCNTME'] = 6
+        vac.loc[vac.VCNCD == 302, 'VCNTME'] = 6
 
-    GNL2ATC = 'SELECT * from dbo.GNL2ATC_complete'
-    GNL2ATC = pd.read_sql(GNL2ATC, cnxn)
-    print('GNL2ATC')
+        vac = vac.query('VCNTME=={}'.format(vcntme))
+        print('vac')
 
-    return table_HOI, vac, bfc, table20, table30, table60, GNL2ATC
-#
-# if __name__ == '__main__':
-#     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC = connect_db(research_dict)
+        # bfc table 추출
+        bfc = ('SELECT * from dbo.BNC where birthdate between {} and {}'.format(use_start_date, use_end_date))
+        bfc = pd.read_sql(bfc, data_cnxn)
+        print('bfc')
+
+        # 20 table 추출
+        table20 = (
+            'SELECT * from dbo.T20 where MDCARE_STRT_DT between {} and {}'.format(research_start_date,
+                                                                                  research_end_date))
+        table20 = pd.read_sql(table20, data_cnxn)
+        HOI_patients_rnkey = table20.RN_KEY.tolist()
+        print('table20')
+
+        # 30 table 추출
+        table30 = (
+            'SELECT * from dbo.T30 where MDCARE_STRT_DT between {} and {}'.format(research_start_date,
+                                                                                  research_end_date))
+        table30 = pd.read_sql(table30, data_cnxn)
+        table30 = table30[table30.RN_KEY.isin(HOI_patients_rnkey)]
+        print('table30')
+
+        # 60 table 추출
+        table60 = ('SELECT * from dbo.T60 where left(MDCARE_STRT_DT,8) between {} and {}'.format(research_start_date,
+                                                                                                 research_end_date))
+        table60 = pd.read_sql(table60, data_cnxn)
+        table60 = table60[table60.RN_KEY.isin(HOI_patients_rnkey)]
+        print('table60')
+
+        # GNL2ATC 불러오기 추출
+        GNL2ATC = 'SELECT * from dbo.GNL2ATC_complete'
+        GNL2ATC = pd.read_sql(GNL2ATC, data_cnxn)
+        print('GNL2ATC')
+
+        # 사망테이블 불러오기
+        death = 'SELECT * from dbo.BND'
+        death = pd.read_sql(death, data_cnxn)
+        print('BND')
+
+    return table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death

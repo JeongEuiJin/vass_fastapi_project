@@ -1,14 +1,14 @@
-##extract.py
+# extract.py
 from datetime import datetime
 
 import pandas as pd
 
 
 # 처방 데이터 추출 (main.py의 read data 부분에서 만든 target_total_pre와 case/control에서 만든 target_total을 활용합니다.)
-def Extract_ml_input(target_total_pre, target_total, GNL2ATC):
+def extract_ml_input(target_total_pre, target_total, GNL2ATC):
     input_data_list = list()
     for idx, (key1, group) in enumerate(target_total_pre.groupby('RN_INDI')):
-        print (idx)
+        print(idx)
         target_total_pre.rename(columns={'start_day': 'MDCARE_STRT_DT'}, inplace=True)
         group['MDCARE_STRT_DT'] = group['MDCARE_STRT_DT'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
         target_total["start_day"] = target_total["start_day"].astype("datetime64")
@@ -41,7 +41,7 @@ def Extract_ml_input(target_total_pre, target_total, GNL2ATC):
 def extract_window(input_df, age_type):
     tmp = input_df.drop(['case', 'end_day', 'RN_INDI', 'start_day'], axis=1)
     input_cols = tmp.columns.tolist()
-    save_cols = ['case', 'end_day', 'RN_INDI', 'start_day', 'STD_YYYY', 'SEX', age_type, 'VCN']
+    save_cols = ['case', 'end_day', 'RN_INDI', 'start_day', 'SEX', age_type, 'VCN']
     atc_cols = list(set(input_cols) - set(save_cols))
 
     target_atc = tmp[atc_cols]
@@ -53,8 +53,26 @@ def extract_window(input_df, age_type):
     sum_zero_idx = sum_df.index
     target_atc.drop(sum_zero_idx, inplace=True)
 
-    ## END,STR DAY 지우기 
+    ## END,STR DAY 지우기
     target_atc.drop(['start_day', 'end_day'], axis=1, inplace=True)
+
+    # VCN이 0, 1인 각 케이스로 나눔 : VCN이 1인 경우는 VCNYMD에 따라 각 월에 사람을 할당하기 위함임
+    vac1 = target_atc[target_atc['VCN'] == 1]
+    vac0 = target_atc[target_atc['VCN'] == 0]
+
+    vac_dates = vac1['VCNYMD'].astype(str).str[:6]
+    dfs = {f'{k}': g for k, g in vac1.groupby(vac_dates)}
+
+    df_name = []
+    for k, v in list(dfs.items()):
+        df_name.append(k)
+    df_name = list(map(int, df_name))
+
+    final_input = {}
+    for i in range(len(dfs)):
+        final_input[i] = vac0.append(dfs[(list(dfs.keys())[i])])
+
+    target_atc = dict(zip(df_name, list(final_input.values())))
 
     # 머신러닝 데이터셋 생성 완료
     # 환자ID, 약물 코드, 나이, 성별, 백신접종 여부, 위험/대조구간 여부(case)만 포함되어 있음

@@ -1,11 +1,15 @@
+# main.py #
+import warnings
 from datetime import datetime
 
 import pandas as pd
 
-from ML_analysis.ML_analysis import ML_run
-from ML_analysis.duration_final import ControlDuration, case_groupby, CaseDuration
-from ML_analysis.extract_final import extract_window, Extract_ml_input
-from ML_analysis.join_final import Join
+from app.ML_analysis.ML_analysis_copy import ML_run
+from app.ML_analysis.duration_final import CaseDuration, case_groupby, ControlDuration
+from app.ML_analysis.extract_final import extract_ml_input, extract_window
+from app.ML_analysis.join_final import Join
+
+warnings.filterwarnings("ignore")
 
 
 def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC):
@@ -26,20 +30,13 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
 
     print('read_data is done')
 
-    # VCNCD=int(research_dict['vaccine_target_id'])
-    # VCNTME=int(research_dict['VCNTIME'])
-    # DB에 vcn
-    # 현재 vaccine:35 >> 인플루엔자
     vac = vac[['RN_INDI', 'VCNYMD', 'VCNCD', 'VCNTME']]
-    vac = vac.query('VCNCD==901 or VCNCD==1601 or VCNCD==1401 or VCNCD==202 or VCNCD==2301')
     vac = vac[vac['RN_INDI'].isin(HOI_patients)]
     vac.reset_index(inplace=True, drop=True)
     vac['VCNYMD'] = vac['VCNYMD'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
-    # vac = vac.query("{}<=VCNYMD<={}". format(research_start_date, research_end_date))
 
     bfc = bfc[bfc['RN_INDI'].isin(HOI_patients)]
     bfc['birthdate'] = bfc['birthdate'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
-    # bfc = bfc.query("{}<=birthdate<={}".format(use_start_date, use_end_date))
     bfc.reset_index(inplace=True, drop=True)
     bfc = bfc.merge(vac[['RN_INDI', 'VCNYMD']], how='left', on='RN_INDI')
     bfc['age_calcul'] = (bfc['VCNYMD'] - bfc['birthdate']).dt.days
@@ -54,6 +51,7 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     elif age_type == 'WEEK':
         bfc = bfc.query('{}<=WEEK<={}'.format(age_select_start, age_select_end))
     else:
+        # TODO : 유정샘 bfc 없으면 에러나오게 하는걸 추가해야될거같네요
         pass
 
     # 조건을 만족하는 사람들의 table_HOI 기록을 추출하여 table_HOI로 저장하고 아래 분석 코드를 돌린다.
@@ -63,20 +61,14 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
 
     table20 = table20[table20.RN_INDI.isin(HOI_patients)]
     table20 = table20[['RN_KEY', 'RN_INDI', 'MDCARE_STRT_DT']]
-    # HOI_patients_dx = table20.query("{}<=MDCARE_STRT_DT<={}".format(research_start_date, research_end_date))
-    # HOI_patients_rnkey = HOI_patients_dx.RN_KEY.tolist()
 
     table30 = table30[['RN_KEY', 'MDCARE_STRT_DT', 'MCARE_DIV_CD']]
-    # table30 = table30.query("{}<=MDCARE_STRT_DT<={}".format(research_start_date, research_end_date))
     table30.rename(columns={'MDCARE_STRT_DT': 'drug_date'}, inplace=True)
-    # table30 = table30[table30.RN_KEY.isin(HOI_patients_rnkey)]
     table30 = table30.merge(table20, how='inner', on='RN_KEY')
     table30.rename(columns={'MCARE_DIV_CD': 'GNL_NM_CD'}, inplace=True)
 
     table60 = table60[['RN_KEY', 'MDCARE_STRT_DT', 'GNL_NM_CD']]
-    # table60 = table60.query("{}<=MDCARE_STRT_DT<={}".format(research_start_date, research_end_date))
     table60.rename(columns={'MDCARE_STRT_DT': 'drug_date'}, inplace=True)
-    # table60 = table60[table60.RN_KEY.isin(HOI_patients_rnkey)]
     table60 = table60.merge(table20, how='inner', on='RN_KEY')
 
     target_total_pre = pd.concat([table30, table60])  # table30, 60 전처리 완료된 파일 합치기
@@ -85,11 +77,10 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     del (table20)
     print('target_total_pre is done')
 
-    GNL2ATC['ATC_N'] = GNL2ATC['ATC'].str[
-                       :atc_n]  # ATC코드라는 컬럼이 총 6-8자리로 이루어진 컬럼인데 앞의 4자리만 활용하기 위해 따로 떼어서 ATC_N 컬럼으로 분리함
+    # ATC코드라는 컬럼이 총 6-8자리로 이루어진 컬럼인데 앞의 4자리만 활용하기 위해 따로 떼어서 ATC_N 컬럼으로 분리함
+    GNL2ATC['ATC_N'] = GNL2ATC['ATC'].str[:atc_n]
 
     # CASE / CONTROL DURATION #
-    # gap_delta : [연구디자인 생성 - 분석 대상 이상반응의 조작적 정의 선택 - gap era]
     gap_delta = int(research_dict['gap_era'])
     target_diag_duration = case_groupby(table_HOI, gap_delta)
     target_diag_duration.reset_index(inplace=True, drop=True)
@@ -99,14 +90,19 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     print('case extraction is done')
     # 아래에서 window_size는 [연구디자인 생성 - machine learning - 위험 및 대조구간 길이] 입니다
     # step_day 는 0으로 고정입니다.
-    target_cont_duration = ControlDuration(target_diag_duration, research_end_date, window_size,
-                                           step_day=0).target_cont_duration()
+    target_cont_duration = ControlDuration(
+        target_diag_duration,
+        research_end_date,
+        window_size,
+        step_day=0
+    ).target_cont_duration()
+
     target_total = pd.concat([target_date, target_cont_duration])  # 위에서 만든 두 개의 테이블을 합침
     target_total.reset_index(inplace=True, drop=True)
     target_total_pre.reset_index(inplace=True, drop=True)
     print('ctrl extraction is done')
     # 각 구간 동안의 처방 데이터 추출
-    drug_output = Extract_ml_input(target_total_pre, target_total, GNL2ATC)
+    drug_output = extract_ml_input(target_total_pre, target_total, GNL2ATC)
     print('drug_output is done')
     # 만들어진 데이터셋에 bfc, vac 테이블을 Join 합니다.
     input_df = Join(target_total, vac, drug_output, bfc, age_type).BFC()
@@ -116,12 +112,13 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     print('ML input is done')
     # # Run machine learning
     print('Whole process is done')
-    results = ML_run(input_data, target_date).ML()
-    return results
+    result = ML_run(input_data, target_date).ML()
+    return result
 
 # if __name__ == '__main__':
-#     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC = connect_db(params)
+#     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC = sc.connect_db(research_dict)
 #     print('DB reading is done.')
+#
 #     results = ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
 #     print(results)
-# format 맞추고, dataframe >> pyodbc
+#    # results를 AnalysisResultsML table에 넣음

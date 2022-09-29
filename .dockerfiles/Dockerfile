@@ -63,7 +63,8 @@ RUN         chmod +x /start-reload.sh
 COPY        ./app /app
 WORKDIR     /app/
 
-ENV PYTHONPATH=/app
+ENV         PYTHONPATH=/app
+ENV         API_ENV='prod'
 
 EXPOSE 80
 # Run the start script, it will check for an /app/prestart.sh script (e.g. for migrations)

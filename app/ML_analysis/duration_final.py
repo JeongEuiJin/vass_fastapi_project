@@ -1,7 +1,8 @@
 # duration.py
-import pandas as pd
-import numpy as np
 from datetime import timedelta, datetime
+
+import numpy as np
+import pandas as pd
 
 
 ##table_HOI에서 RN_INDI (환자) 별로, 시작일 (가장 빠른 날짜), 마지막일 (가장 늦은 날짜) 3개 컬럼 생성
@@ -16,7 +17,7 @@ def case_groupby(table_HOI, gap_delta):
         tmp_diff = group.diff_day.dt.days
         tmp_diff.fillna(0, inplace=True)
         str_n = 1
-        #         gap_delta = 31
+
         for day in tmp_diff:
             if day < gap_delta:
                 row_numbers.append(str_n)
@@ -34,7 +35,7 @@ def case_groupby(table_HOI, gap_delta):
 
 
 # 아래에서 window_size는 [연구디자인 생성 - machine learning - 위험 및 대조구간 길이] 입니다.
-# 환자ID 별로 위험 구간을 추출하는 코드입니다. 위 target_diag_duration 테이블에서 시작일 이전 14일~시작일 만큼을 위험 구간으로 만듭니다.
+# 환자ID 별로 위험 구간을 추출하는 코드입니다.
 class CaseDuration:
     def __init__(self, groupby, window_size):
         self.window_size = window_size
