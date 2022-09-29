@@ -1,0 +1,85 @@
+# docker build -t <사용할 이미지 이름> <프로젝트경로> -f <Dockerfile이 존재하는 경로>
+# docker build -t [eb_ubuntu] [.] -f [.dockerfiles/Dockerfile.ubuntu]
+
+# /NS_RECORD/ 커맨드 입력
+# docker run ubuntu:18.04
+# docker build -t w_ubuntu . -f .dockerfiles/Dockerfile.ubuntu
+# docker build -t vass_fastapi_deploy . -f .dockerfiles/Dockerfile
+# docker run --rm -it -p 9000:80 vass_fastapi_deploy
+
+FROM        --platform=linux/amd64 ubuntu:18.04
+MAINTAINER  comeinlab@gmail.com
+
+# apt-get packages
+RUN         apt-get -y update
+RUN         apt-get install -y python-pip
+RUN         apt-get install -y git vim
+
+# pyenv
+ENV         DEBIAN_FRONTEND=noninteractive
+RUN         apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils liblzma-dev
+RUN         curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+ENV         PATH /root/.pyenv/bin:$PATH
+RUN         pyenv install 3.8.13
+
+# zsh
+RUN         apt-get -y install zsh
+RUN         wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true
+RUN         chsh -s /usr/bin/zsh
+
+# pyenv settings
+RUN         echo 'export PATH="/root/.pyenv/bin:$PATH"' >> ~/.zshrc
+RUN         echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+RUN         echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.zshrc
+
+# pyenv virtualenv
+
+RUN         pyenv virtualenv 3.8.13 deploy_docker
+
+## uWGSI install
+#RUN         /root/.pyenv/versions/deploy_docker/bin/pip install uwsgi
+
+# Nginx install
+#RUN         apt-get -y install nginx
+
+# supervisor install
+#RUN         apt-get -y install supervisor
+
+# pyodbc mssql을 사용하기위해 아래 패키지 설치
+RUN         apt-get -y install software-properties-common
+RUN         curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN         add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list)"
+RUN         curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+
+RUN         apt-get update
+RUN         ACCEPT_EULA=Y apt-get -y install msodbcsql17
+RUN         ACCEPT_EULA=Y apt-get -y install mssql-tools
+RUN         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.zshrc
+RUN         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.zshrc
+
+RUN         apt-get update
+RUN         apt-get -y install unixodbc-dev
+
+
+ENV         LANG    C.UTF-8
+ENV         LC_ALL  C.UTF-8
+ENV         PYTHONIOENCODING=utf-8
+
+ENV         TZ=Asia/Seoul
+RUN         apt-get install -y tzdata
+
+COPY        . /srv/project
+WORKDIR     /srv/project
+
+RUN         /root/.pyenv/versions/deploy_docker/bin/pip install -r /srv/project/.requirements/deploy.txt
+
+
+#CMD         ["gunicorn_run.sh"]
+#CMD         ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9000"]
+
+#RUN         chmod +x /srv/project/gunicorn_run.sh
+#RUN         /srv/project/gunicorn_run.sh
+
+
+EXPOSE      9000
