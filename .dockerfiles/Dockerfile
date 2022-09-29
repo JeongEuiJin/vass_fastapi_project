@@ -1,3 +1,7 @@
+# 도커 명령어
+# docker build -t gunicorn_fastapi . -f .dockerfiles/Dockerfile
+# docker run --rm -it -p 9000:80 gunicorn_fastapi
+
 FROM        --platform=linux/amd64 ubuntu:18.04
 MAINTAINER  comeinlab@gmail.com
 

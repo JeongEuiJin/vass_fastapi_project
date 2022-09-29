@@ -21,7 +21,6 @@ def run_ml_tasks(params):
     # SCRI function 추가
 
 
-
 @router.post("/")
 async def index(params: GetParametersSCRI, background_tasks: BackgroundTasks):
     """
@@ -32,4 +31,4 @@ async def index(params: GetParametersSCRI, background_tasks: BackgroundTasks):
     print("params :: ", params)
     background_tasks.add_task(run_ml_tasks, params)
 
-    return params
+    return {"background_task": True}
