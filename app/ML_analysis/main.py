@@ -112,7 +112,7 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     print('ML input is done')
     # # Run machine learning
     print('Whole process is done')
-    result = ML_run(input_data, target_date).ML()
+    result = ML_run(input_data, target_date).ML(research_dict)
     return result
 
 # if __name__ == '__main__':

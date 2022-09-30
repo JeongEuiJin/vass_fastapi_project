@@ -4,15 +4,13 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
-from .research_dict2 import research_dict
-
 
 class ML_run:
     def __init__(self, input_data, target_date):
         self.input_data = input_data
         self.target_date = target_date
 
-    def ML(self):
+    def ML(self, research_dict):
         input_data = self.input_data
         target_date = self.target_date
         # select target input
