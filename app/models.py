@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class GetParametersSCRI(BaseModel):
-    use_start_date: Optional[str] = None
-    use_end_date: Optional[str] = None
+    use_start_date: str
+    use_end_date: str
     research_start_date: Optional[str] = None
     research_end_date: Optional[str] = None
     vaccine: Optional[int] = None
