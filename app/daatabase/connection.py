@@ -20,7 +20,7 @@ def conn_db(_db_name):
     # database settings config
     database_config = config_secret_setting['fastapi']['databases']
 
-    driver = database_config['driver']  # DB DRIVER ex) mssql - 'ODBC Driver 17 for SQL Server'
+    driver = database_config['DRIVER']  # DB DRIVER ex) mssql - 'ODBC Driver 17 for SQL Server'
     server = database_config['HOST']  # HOST
     port = database_config['PORT']  # PORT 포트가 있다면 연결해야될것으로 보임
 
@@ -28,8 +28,8 @@ def conn_db(_db_name):
     user = database_config['USER']
 
     # 패스워드
-    password = database_config['USER']
+    password = database_config['PASSWORD']
 
     # DB 연결
-    _url = 'DRIVER={' + driver + '};SERVER=' + server + ';DATABASE=' + _db_name + ';UID=' + user + ';PWD=' + password
+    _url = 'DRIVER={' + driver + '};SERVER=' + server + ',' + port + ';DATABASE=' + _db_name + ';UID=' + user + ';PWD=' + password
     return pyodbc.connect(_url)

@@ -94,10 +94,10 @@ class ML_run:
             calculated_date = str(i)
 
             # TODO: 유정샘 여기도 확인해주세요 입력받은 값이 들어오는게 아닌거같습니다.
-            vaccine = research_dict['vaccine_target_id']
-            vcntme = research_dict['vcntime']
-            hoidefn = research_dict['hoidefn']
-            studydesign = research_dict['studydesignid']
+            vaccine = research_dict.vaccine_target_id
+            vcntme = research_dict.vcntime
+            hoidefn = research_dict.hoidefn
+            studydesign = research_dict.studydesignid
 
             results = ({
                 'studydesign': [studydesign],

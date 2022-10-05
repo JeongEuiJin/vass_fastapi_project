@@ -2,6 +2,9 @@
 # docker build -t gunicorn_fastapi . -f .dockerfiles/Dockerfile
 # docker run --rm -it -p 9000:80 gunicorn_fastapi
 
+# cache 때문에 수정한것이 안되면 아래걸로 실행
+# docker build --no-cache -t gunicorn_fastapi . -f .dockerfiles/Dockerfile
+
 FROM        --platform=linux/amd64 ubuntu:18.04
 MAINTAINER  comeinlab@gmail.com
 

@@ -16,14 +16,14 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     atc_n = 4  # 고정
 
     # dictionary reading
-    use_start_date = int(research_dict['use_start_date'])
-    use_end_date = int(research_dict['use_end_date'])
-    research_start_date = int(research_dict['research_start_date'])
-    research_end_date = int(research_dict['research_end_date'])
-    window_size = int(research_dict['ml_window_size'])
-    age_type = research_dict['age_type']
-    age_select_start = int(research_dict['age_select_start'])
-    age_select_end = int(research_dict['age_select_end'])
+    use_start_date = int(research_dict.use_start_date)
+    use_end_date = int(research_dict.use_end_date)
+    research_start_date = int(research_dict.research_start_date)
+    research_end_date = int(research_dict.research_end_date)
+    window_size = int(research_dict.ml_window_size)
+    age_type = research_dict.age_type
+    age_select_start = int(research_dict.age_select_start)
+    age_select_end = int(research_dict.age_select_end)
 
     # READ DATA
     HOI_patients = table_HOI.RN_INDI.tolist()

@@ -11,22 +11,16 @@ services:
     container_name: vass_fastapi
     platform: linux/amd64
     build:
-      dockerfile: .dockerfiles/Dockerfile.ubuntu
+      dockerfile: .dockerfiles/Dockerfile
     expose:
       - "9000"
     ports:
-      - "9000:9000"
+      - 9000:80
+    volumes:
+      - ./:/app
     extra_hosts:
-      - "parenthost:172.17.13.25"
-      - "otherhost:172.17.5.115"
-    entrypoint:
-      - -c
-      - chmod 777 /srv/project
-      - /srv/project/gunicorn_run.sh
-#    command:
-#      - bash -c chmod -x /srv/project/gunicorn_run.sh
-#      - bash -c /srv/project/gunicorn_run.sh
-
-#      - bash -c "cd /srv/project && /root/.pyenv/versions/deploy_docker/bin/gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:9000 --workers 2"
-#      - /root/.pyenv/versions/deploy_docker/bin/gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:9000 --workers 2
-#      - gunicorn -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:9000 --workers 2
+    - "host.docker.internal:host-gateway"
+####
+# docker run -d --name ms-sql-server -e "ACCEPT_EULA=Y" -e 'SA_PASSWORD=123aaa!@#' -v data:/var/opt/mssql -p 1433:1433 mcr.microsoft.com/azure-sql-edge:latest
+# docker run -d --name ms-sql-server -e "ACCEPT_EULA=Y" -e 'SA_PASSWORD=123aaa!@#' -p 1433:1433 mcr.microsoft.com/azure-sql-edge:latest
+###

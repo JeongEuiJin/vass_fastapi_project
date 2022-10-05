@@ -3,18 +3,18 @@ import pandas as pd
 from app.daatabase.connection import conn_db
 
 
-def connect_db(research_dict):
+def connect_db(research_dict: dict):
     # dictionary reading: 연구디자인 페이지에서 각 항목을 클릭했을 때 나오는 딕셔너리들 중 일부를 불러옵니다.
-    use_start_date = int(research_dict['use_start_date'])
-    use_end_date = int(research_dict['use_end_date'])
-    research_start_date = int(research_dict['research_start_date'])
-    research_end_date = int(research_dict['research_end_date'])
-    vcncd = int(research_dict['vaccine_target_id'])  # 백신종류
-    vcntme = int(research_dict['vcntime'])  # 백신차수
+    use_start_date = int(research_dict.use_start_date)
+    use_end_date = int(research_dict.use_end_date)
+    research_start_date = int(research_dict.research_start_date)
+    research_end_date = int(research_dict.research_end_date)
+    vcncd = int(research_dict.vaccine_target_id)  # 백신종류
+    vcntme = int(research_dict.vcntime)  # 백신차수
 
     # 조작적 정의 DB 연결
-    research_cnxn = conn_db('')
-    data_cnxn = conn_db('')
+    research_cnxn = conn_db('VASS_DATA')
+    data_cnxn = conn_db('VASS_DATA')
 
     with research_cnxn:
         table_HOI = 'SELECT * FROM dbo.example'  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.

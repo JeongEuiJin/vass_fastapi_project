@@ -8,8 +8,10 @@ class GetParametersSCRI(BaseModel):
     use_end_date: str
     research_start_date: Optional[str] = None
     research_end_date: Optional[str] = None
-    vaccine: Optional[int] = None
+    vaccine_target_id: Optional[int] = None
     hoidefn: Optional[int] = None
+    vcntime: Optional[int] = None
+    studydesignid: Optional[int] = None
     age_type: Optional[str] = None
     age_select_start: Optional[int] = None
     age_select_end: Optional[int] = None

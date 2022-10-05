@@ -21,4 +21,4 @@ export GUNICORN_CONF=${GUNICORN_CONF:-$DEFAULT_GUNICORN_CONF}
 export WORKER_CLASS=${WORKER_CLASS:-"uvicorn.workers.UvicornWorker"}
 
 # Start Gunicorn
-exec /root/.pyenv/versions/deploy_docker/bin/gunicorn -k "$WORKER_CLASS" -c "$GUNICORN_CONF" "$APP_MODULE"
+exec /root/.pyenv/versions/deploy_docker/bin/gunicorn -k "$WORKER_CLASS" --access-logfile ./gunicorn-access.log -c "$GUNICORN_CONF" "$APP_MODULE"
