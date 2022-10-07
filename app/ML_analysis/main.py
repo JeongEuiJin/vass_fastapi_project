@@ -39,13 +39,18 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     bfc['birthdate'] = bfc['birthdate'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
     bfc.reset_index(inplace=True, drop=True)
     bfc = bfc.merge(vac[['RN_INDI', 'VCNYMD']], how='left', on='RN_INDI')
+
+    # TODO 만약 백신 데이터가 없는 경우 프린트 되는 알람입니다.
+    if bfc.empty:
+        print('좀 더 긴 관찰 기간을 설정해 주세요.')
+
     bfc['age_calcul'] = (bfc['VCNYMD'] - bfc['birthdate']).dt.days
     bfc['WEEK'] = bfc['age_calcul'] / 7
-    bfc['YEAR'] = (bfc['age_calcul'] / 365.25) + 1
+    bfc['AGE'] = (bfc['age_calcul'] / 365.25) + 1
     bfc['MONTH'] = bfc['age_calcul'] / 30.5
 
-    if age_type == 'YEAR':
-        bfc = bfc.query('{}<=YEAR<={}'.format(age_select_start, age_select_end))
+    if age_type == 'AGE':
+        bfc = bfc.query('{}<=AGE<={}'.format(age_select_start, age_select_end))
     elif age_type == 'MONTH':
         bfc = bfc.query('{}<=MONTH<={}'.format(age_select_start, age_select_end))
     elif age_type == 'WEEK':
@@ -53,6 +58,10 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     else:
         # TODO : 유정샘 bfc 없으면 에러나오게 하는걸 추가해야될거같네요
         pass
+
+    # TODO 반영해서 추가한 부분입니다. 빈 bfc의 경우는 아래 문구가 프린트 됩니다.
+    if bfc.empty:
+        print('나이 설정을 다시 해 주세요.')
 
     # 조건을 만족하는 사람들의 table_HOI 기록을 추출하여 table_HOI로 저장하고 아래 분석 코드를 돌린다.
     bfc_patients = bfc.RN_INDI.tolist()
@@ -81,7 +90,7 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     GNL2ATC['ATC_N'] = GNL2ATC['ATC'].str[:atc_n]
 
     # CASE / CONTROL DURATION #
-    gap_delta = int(research_dict['gap_era'])
+    gap_delta = int(research_dict.gap_era)
     target_diag_duration = case_groupby(table_HOI, gap_delta)
     target_diag_duration.reset_index(inplace=True, drop=True)
 

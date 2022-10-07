@@ -17,7 +17,7 @@ def connect_db(research_dict: dict):
     data_cnxn = conn_db('VASS_DATA')
 
     with research_cnxn:
-        table_HOI = 'SELECT * FROM dbo.example'  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
+        table_HOI = 'SELECT * FROM dbo.example where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date)  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
         table_HOI = pd.read_sql(table_HOI, research_cnxn)
         print('Table_HOI')
 
@@ -28,7 +28,7 @@ def connect_db(research_dict: dict):
         vac_mapping = vac_mapping.VCNCD.tolist()
         vac_mapping = list(map(int, vac_mapping))
 
-        vac = ('SELECT * FROM dbo.vcn2 where VCNYMD between {} and {}'.format(research_start_date, research_end_date))
+        vac = ('SELECT * FROM dbo.vcn_more where VCNYMD between {} and {}'.format(research_start_date, research_end_date))
         # vac = ('SELECT * FROM dbo.vcn2')
         vac = pd.read_sql(vac, data_cnxn)
 
@@ -53,23 +53,19 @@ def connect_db(research_dict: dict):
 
         # 20 table 추출
         table20 = (
-            'SELECT * from dbo.T20 where MDCARE_STRT_DT between {} and {}'.format(research_start_date,
-                                                                                  research_end_date))
+            'SELECT * from dbo.T20 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date))
         table20 = pd.read_sql(table20, data_cnxn)
         HOI_patients_rnkey = table20.RN_KEY.tolist()
         print('table20')
 
         # 30 table 추출
-        table30 = (
-            'SELECT * from dbo.T30 where MDCARE_STRT_DT between {} and {}'.format(research_start_date,
-                                                                                  research_end_date))
+        table30 = ('SELECT * from dbo.T30 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date))
         table30 = pd.read_sql(table30, data_cnxn)
         table30 = table30[table30.RN_KEY.isin(HOI_patients_rnkey)]
         print('table30')
 
         # 60 table 추출
-        table60 = ('SELECT * from dbo.T60 where left(MDCARE_STRT_DT,8) between {} and {}'.format(research_start_date,
-                                                                                                 research_end_date))
+        table60 = ('SELECT * from dbo.T60 where left(MDCARE_STRT_DT,8) between {} and {}'.format(research_start_date, research_end_date))
         table60 = pd.read_sql(table60, data_cnxn)
         table60 = table60[table60.RN_KEY.isin(HOI_patients_rnkey)]
         print('table60')

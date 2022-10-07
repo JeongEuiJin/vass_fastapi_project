@@ -41,19 +41,16 @@ class ML_run:
 
             # ---model running---#
             # grid search start
-            # grid search란 머신러닝에서 필요한 Parameter들을 조합하여 가장 최적의 조합을 찾아 주는 기능입니다
-            # 찾아보니 weka라는 것을 활용하면 자바에서도 머신러닝이 가능한듯 한데..
-            # (https://www.codingame.com/playgrounds/7163/machine-learning-with-java---part-6-random-forest)
-            # (https://griddb.net/en/blog/how-to-implement-a-random-forest-algorithm-in-java/)
-            # (http://haifengl.github.io/api/java/smile/regression/RandomForest.html)
-            # grid search가 가능한지는 잘 모르겠습니다.
-            # 한 번 보시고, 불가능하실 것 같으면 알려주세요. 방법을 좀 더 찾아보겠습니다.
-
             # setting할 parameter들을 나열함 (parameter명은 파이썬 패키지 내 정해져있는 이름입니다. Java에서 가능한 모듈을 찾아서 알려주시면 제가 보고 parameter명을 알려드리겠습니다.)
+            # params_grid = {
+            # 'n_estimators': [100, 200, 300],
+            # 'max_depth': [10, 15, 20, 25],
+            # 'criterion': ('gini', 'entropy')
+            # }
+
             params_grid = {
-                'n_estimators': [100, 200, 300],
-                'max_depth': [10, 15, 20, 25],
-                'criterion': ('gini', 'entropy')
+                'n_estimators': [100, 300],
+                'max_depth': [10, 20]
             }
 
             model = RandomForestClassifier()  # random forest 모델을 불러옵니다.
@@ -89,28 +86,26 @@ class ML_run:
                 features_int_RR = pd.concat([features_int_RR, vcn_df])
 
             fi_ratio = float(features_int_RR.loc['VCN'])
-            injected_case = real_input[i].VCN.sum()
-            risk_case = real_input[i].case.sum()
+            injected_case = real_input.VCN.sum()
+            risk_case = real_input.case.sum()
             calculated_date = str(i)
-
-            # TODO: 유정샘 여기도 확인해주세요 입력받은 값이 들어오는게 아닌거같습니다.
             vaccine = research_dict.vaccine_target_id
             vcntme = research_dict.vcntime
             hoidefn = research_dict.hoidefn
             studydesign = research_dict.studydesignid
 
             results = ({
-                'studydesign': [studydesign],
-                'vaccine': [vaccine],
-                'vcntime': [vcntme],
-                'hoidefn': [hoidefn],
-                'calculated_date': [calculated_date],
-                'fi_ratio': [fi_ratio],
-                'injected_case': [injected_case],
-                'risk_case': [risk_case],
+                'studydesign': studydesign,
+                'vaccine': vaccine,
+                'vcntime': vcntme,
+                'hoidefn': hoidefn,
+                'calculated_date': calculated_date + '28',
+                'fi_ratio': fi_ratio,
+                'injected_case': injected_case,
+                'risk_case': risk_case
             })
+
             results_df = results_df.append(results, ignore_index=True)
-            print(results_df)
             print(i, '월 분석이 완료 되었습니다.')
 
         return results_df  # 이 값이 AnalysisResultML에 들어갑니다.
