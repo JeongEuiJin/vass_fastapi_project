@@ -11,7 +11,7 @@ def ml_insert(results):
         vaccinehoidefn_id = research_cursor.fetchall()[0][0]
 
         research_cursor.execute(
-            'INSERT INTO dbo.AnalysisResultsML (studydesign_id, vaccinehoidefn_id, calculated_date, fi_ratio, injected_case, risk_case) values (?,?,?,?,?,?)',
+            'INSERT INTO dbo.AnalysisResultsML (studydesign_id, vaccinehoidefn_id, calculated_time, fi_ratio, injected_case, risk_case) values (?,?,?,?,?,?)',
             row.studydesign, vaccinehoidefn_id, row.calculated_date, row.fi_ratio, row.injected_case, row.risk_case
         )
 
