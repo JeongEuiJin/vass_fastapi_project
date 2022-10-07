@@ -3,6 +3,7 @@ from starlette.background import BackgroundTasks
 
 from app.ML_analysis.main import ml_run
 from app.ML_analysis.server_connect import connect_db
+from app.daatabase.db_insert import ml_insert
 from app.models import GetParametersSCRI
 
 router = APIRouter()
@@ -18,6 +19,7 @@ def run_ml_tasks(params: dict):
     results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
     # results 를 디비에넣는걸 추가
     print(results)
+    ml_insert(results)
     # SCRI function 추가
 
 
