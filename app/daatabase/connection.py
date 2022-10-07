@@ -33,3 +33,27 @@ def conn_db(_db_name):
     # DB 연결
     _url = 'DRIVER={' + driver + '};SERVER=' + server + ',' + port + ';DATABASE=' + _db_name + ';UID=' + user + ';PWD=' + password
     return pyodbc.connect(_url)
+
+
+def conn_web_db():
+    """
+    결과 테이블
+    :return:
+    """
+    c = conf()
+
+    # secret json file load
+    config_secret_setting = json.loads(open(c.CONFIG_SETTING_FILE).read())
+    # database settings config
+    database_config = config_secret_setting['django']['databases']
+
+    driver = database_config['DRIVER']
+    server = database_config['HOST']
+    database = database_config['NAME']
+    # 접속 유저
+    user = database_config['USER']
+
+    # 패스워드
+    password = database_config['PASSWORD']
+    _url = 'DRIVER={' + driver + '};SERVER=' + server + ';DATABASE=' + database + ';UID=' + user + ';PWD=' + password
+    return pyodbc.connect(_url)
