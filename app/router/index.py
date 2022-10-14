@@ -4,7 +4,10 @@ from starlette.background import BackgroundTasks
 from app.ML_analysis.main import ml_run
 from app.ML_analysis.server_connect import connect_db
 from app.daatabase.db_insert import ml_insert
+from app.daatabase.db_insert import scri_insert
+from app.daatabase.db_insert import scri_sex_insert
 from app.models import GetParametersSCRI
+from app.ML_analysis.vaccine_scri_ss_CMI import SCRI
 
 router = APIRouter()
 
@@ -16,14 +19,17 @@ def run_ml_tasks(params: dict):
     :return:
     """
     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
-    results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
-    # results 를 디비에넣는걸 추가
-    print(results)
-    ml_insert(results)
-    # results >> ml_results로 바꾸고
+    ml_results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
+    print (ml_results)
+    ml_insert(ml_results)
+    scri_results = SCRI(params, table_HOI, bfc, death, vac)
+    print (scri_results)
+    scri_insert(scri_results)
+    scri_sex_results = SCRI(params, table_HOI, bfc, death, vac)
+    print (scri_sex_results)
+    scri_sex_insert(scri_sex_results)
 
 
-#scri 넣게끔
 
 
 @router.post("/")

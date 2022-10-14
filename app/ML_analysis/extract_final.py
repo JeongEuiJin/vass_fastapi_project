@@ -8,7 +8,6 @@ import pandas as pd
 def extract_ml_input(target_total_pre, target_total, GNL2ATC):
     input_data_list = list()
     for idx, (key1, group) in enumerate(target_total_pre.groupby('RN_INDI')):
-        print(idx)
         target_total_pre.rename(columns={'start_day': 'MDCARE_STRT_DT'}, inplace=True)
         group['MDCARE_STRT_DT'] = group['MDCARE_STRT_DT'].apply(lambda x: datetime.strptime(str(x), '%Y%m%d'))
         target_total["start_day"] = target_total["start_day"].astype("datetime64")
