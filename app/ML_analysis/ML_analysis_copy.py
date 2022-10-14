@@ -58,7 +58,7 @@ class ML_run:
                 estimator=model,
                 param_grid=params_grid,
                 scoring='roc_auc',
-                cv=5
+                cv=2
             )  # auroc를 기준으로 모델에서 최적의 parameter를 찾습니다
             grid_search.fit(x_train, y_train)
             model = grid_search.best_estimator_  # 가장 최적의 성능을 내는 best_estimator를 학습기로 활용합니다.

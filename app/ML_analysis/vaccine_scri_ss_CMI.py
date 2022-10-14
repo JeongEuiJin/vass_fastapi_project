@@ -133,13 +133,15 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
         R2 = int(research_dict.scri_risk_window_end)  # research_dict 에서 가져옴*
         C1 = int(research_dict.scri_con_window_start_1)  # research_dict 에서 가져옴*
         C2 = int(research_dict.scri_con_window_end_1)  # research_dict 에서 가져옴*
-        C3 = int(research_dict.scri_con_window_start_2)  # research_dict 에서 가져옴*
-        C4 = int(research_dict.scri_con_window_end_2)  # research_dict 에서 가져옴*
+        C3 = research_dict.scri_con_window_start_2  # research_dict 에서 가져옴*
+        C4 = research_dict.scri_con_window_end_2
 
         # Risk,Control window내에 사망 포함된 경우 제외
         if (C3 == None) or (C4 == None):  # C3, C4에 입력 값이 없을 경우 조건문
             Cmax = max(C1, C2)  # C1 ~ C2 중 최대 값을 Cmax 값에 저장
         else:  # C3, C4에 입력 값이 모두 있을 경우 조건문
+            C3 = int(C3)  # research_dict 에서 가져옴*
+            C4 = int(C4)  # research_dict 에서 가져옴*
             Cmax = max(C1, C2, C3, C4)  # C1 ~ C4 중 최대 값을 Cmax 값에 저장
         # vac_diag2 중에서 DTH_YYYYMM값이 없거나, DTH_YYYYMM 값이 VCNYMD + 날짜형의(Cmax) 보다 큰 경우의 데이터만 가져옴
         vac_diag3 = vac_diag2[(vac_diag2.DTH_YYYYMM.isnull()) |
@@ -154,6 +156,8 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
             date_window = list(range(R1, R2 + 1)) + list(
                 range(C1, C2 + 1))  # 위에서 지정한 R1 ~ R2, C1 ~ C2 두 구간의 모든 수들의 리스트 생성
         else:  # C3, C4에 입력 값이 모두 있을 경우 조건문
+            C3 = int(C3)  # research_dict 에서 가져옴*
+            C4 = int(C4)
             date_window = list(range(R1, R2 + 1)) + list(range(C1, C2 + 1)) + list(
                 range(C3, C4 + 1))  # 위에서 지정한 R1 ~ R2, C1 ~ C2, C3 ~ C4 세 구간의 모든 수들의 리스트 생성
         day_window = vac_diag5[['RN_INDI', 'VCNYMD']]  # vac_diag5 에서 해당 컬럼들 데이터를 day_window에 지정
@@ -175,8 +179,7 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
         day = pd.merge(left=vac_diag5, right=day_window_1, how="left", on=["RN_INDI", "VCNYMD"])
         day['date'] = day.VCNYMD  # day의 date 컬럼을 생성. VCNYMD 컬럼의 값을 똑같이 가짐
         for i in range(len(day)):  # day의 길이만큼 for루프 진행
-            day['date'][i] = day.VCNYMD[i] + datetime.timedelta(
-                days=int(day.rep_window[i]))  # i번째 행의 date 컬럼 값에 (VCNYMD 컬럼값 + rep_window컬럼값)을 저장
+            day['date'][i] = day.VCNYMD[i] + datetime.timedelta(days=int(day.rep_window[i]))  # i번째 행의 date 컬럼 값에 (VCNYMD 컬럼값 + rep_window컬럼값)을 저장
         day = day.drop(['rep_window'], axis=1)  # rep_window 컬럼을 버림
 
         # date - VCNYMD인 riskperiod열 추가 (Risk=1, control=2)
