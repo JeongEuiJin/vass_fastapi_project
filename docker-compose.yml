@@ -9,7 +9,7 @@ services:
 
   fastapi:
     container_name: vass_fastapi
-    platform: linux/amd64
+#    platform: linux/amd64
     build:
       dockerfile: .dockerfiles/Dockerfile
     expose:

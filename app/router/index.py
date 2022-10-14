@@ -20,7 +20,10 @@ def run_ml_tasks(params: dict):
     # results 를 디비에넣는걸 추가
     print(results)
     ml_insert(results)
-    # SCRI function 추가
+    # results >> ml_results로 바꾸고
+
+
+#scri 넣게끔
 
 
 @router.post("/")
