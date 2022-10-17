@@ -234,7 +234,6 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
 
 
 def scri_analysis(df, sex_type, Alz_date, vac_count):
-    print ('SCRI 분석 시작')
     df.reset_index(drop=True, inplace=True)
     # fu_stt에 date지정, fu_end에 date+1 지정
     scri = df[['RN_INDI', 'date', 'riskperiod', 'outcome']]  # df 에서 해당 컬럼들 데이터를 scri 에 지정
@@ -292,7 +291,6 @@ def scri_analysis(df, sex_type, Alz_date, vac_count):
     scri4['riskperiod_0'] = 1 - scri4.riskperiod  # scri4에 riskperiod_0 컬럼을 생성하며 1 - riskperiod 값을 가짐
     scri4['riskperiod_1'] = scri4.riskperiod  # scri4에 riskperiod_0 컬럼을 생성하며 riskperiod 값을 가짐
 
-    print ('irr 계산 시작')
     fam = sm.families.Poisson(sm.families.links.log())
     ind = sm.cov_struct.Independence()
 
@@ -340,55 +338,51 @@ def SCRI(research_dict, table_HOI, bfc_total, infrm_dth, vac):
     gender = research_dict.scri_gender
     vac_diag = data_integrating(research_dict=research_dict, table_HOI=table_HOI, bfc_total=bfc_total,
                                 infrm_dth=infrm_dth, vac=vac)
+
     # SCRI 분석
-    if (gender == [0]):
+    Result_df = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_diag, sex_type=None,
+                                       strt_date=int(research_dict.research_start_date),
+                                       end_date=int(research_dict.research_end_date))
+    # SCRI 성별 분석
+    if (gender == 1):
+        print('남성 분석')
         vac_diag = vac_diag[vac_diag.SEX == 1]
-        Result_df = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_diag, sex_type=1,
+        Result_df_sex = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_diag, sex_type=1,
                                            strt_date=int(research_dict.research_start_date),
                                            end_date=int(research_dict.research_end_date))
-    elif (gender == [1]):
+    elif (gender == 2):
+        print('여성 분석')
         vac_diag = vac_diag[vac_diag.SEX == 2]
-        Result_df = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_diag, sex_type=2,
+        Result_df_sex = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_diag, sex_type=2,
                                            strt_date=int(research_dict.research_start_date),
                                            end_date=int(research_dict.research_end_date))
-    elif (gender == [0, 1]):
+    elif (gender == 3):
         vac_sex_1 = vac_diag[vac_diag.SEX == 1]
         vac_sex_1.reset_index(drop=True, inplace=True)
         vac_sex_2 = vac_diag[vac_diag.SEX == 2]
         vac_sex_2.reset_index(drop=True, inplace=True)
-        Result_df = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_sex_1, sex_type=1,
+        print('남성 분석')
+        Result_df_sex = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_sex_1, sex_type=1,
                                            strt_date=int(research_dict.research_start_date),
                                            end_date=int(research_dict.research_end_date))
-        Result_df = Result_df.append(
+        print('여성 분석')
+        Result_df_sex = Result_df_sex.append(
             scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_sex_2, sex_type=2,
                                    strt_date=int(research_dict.research_start_date),
                                    end_date=int(research_dict.research_end_date)))
-        Result_df.reset_index(drop=True, inplace=True)
-    elif (gender == None):
-        Result_df = scri_analysis_sex_type(research_dict=research_dict, df_vac_diag=vac_diag, sex_type=None,
-                                           strt_date=int(research_dict.research_start_date),
-                                           end_date=int(research_dict.research_end_date))
+        Result_df_sex.reset_index(drop=True, inplace=True)
     else:
-        Result_df = pd.DataFrame()
+        Result_df_sex = pd.DataFrame()
 
-        ## 아래 DB 컬럼들 추가 ##
-    vaccine = research_dict['vaccine_target_id']
-    vcntme = research_dict['vcntime']
-    hoidefn = research_dict['hoidefn']
-    studydesign = research_dict['studydesignid']
+    ## 아래 DB 컬럼들 추가 ##
+    vaccine = research_dict.vaccine_target_id
+    vcntme = research_dict.vcntime
+    hoidefn = research_dict.hoidefn
+    studydesign = research_dict.studydesignid
 
-    if (gender == None):
-        results = ({
-            'studydesign': studydesign,
-            'vaccine': vaccine,
-            'vcntime': vcntme,
-            'hoidefn': hoidefn,
-            'calculated_date': Result_df.calculated_time + '-28',
-            'irr': Result_df.irr,
-            'irr_cutoff': Result_df.irr_cutoff,
-            'risk_case': Result_df.risk_case,
-            'con_case': Result_df.con_case,
-        })
+    if len(Result_df) == 0:
+        print("No variable matching")
+        result_table = pd.DataFrame()
     else:
         results = ({
             'studydesign': studydesign,
@@ -398,14 +392,32 @@ def SCRI(research_dict, table_HOI, bfc_total, infrm_dth, vac):
             'calculated_date': Result_df.calculated_time + '-28',
             'irr': Result_df.irr,
             'irr_cutoff': Result_df.irr_cutoff,
+            'injected_case': Result_df.injected_case,
             'risk_case': Result_df.risk_case,
             'con_case': Result_df.con_case,
-            'sex': Result_df.sex
         })
+        result_table = pd.DataFrame.from_dict(results)
 
-    result_table = pd.DataFrame.from_dict(results)
+    if len(Result_df_sex) == 0:
+        print("No variable matching for gender table")
+        result_table_sex = pd.DataFrame()
+    else:
+        results_sex = ({
+            'studydesign': studydesign,
+            'vaccine': vaccine,
+            'vcntime': vcntme,
+            'hoidefn': hoidefn,
+            'calculated_date': Result_df_sex.calculated_time + '-28',
+            'irr': Result_df_sex.irr,
+            'irr_cutoff': Result_df_sex.irr_cutoff,
+            'injected_case': Result_df_sex.injected_case,
+            'risk_case': Result_df_sex.risk_case,
+            'con_case': Result_df_sex.con_case,
+            'sex': Result_df_sex.sex
+        })
+        result_table_sex = pd.DataFrame.from_dict(results_sex)
 
-    return result_table
+    return result_table, result_table_sex
 
 #
 # if __name__ == '__main__':

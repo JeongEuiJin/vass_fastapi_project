@@ -8,7 +8,10 @@ def ml_insert(results):
     date = datetime.now()
 
     for index, row in results.iterrows():
-        research_cursor.execute('''select id from dbo.VaccineHOIdefn where vaccine_id={} and hoidefn_id={}'''.format(row.vaccine, row.hoidefn))
+        research_cursor.execute('''select id from dbo.Vaccine where vaccine_target_id={} and vcn_time={}'''.format(row.vaccine, row.vcntime))
+        vac_id = research_cursor.fetchall()[0][0]
+
+        research_cursor.execute('''select id from dbo.VaccineHOIdefn where vaccine_id={} and hoidefn_id={}'''.format(vac_id, row.hoidefn))
         vaccinehoidefn_id = research_cursor.fetchall()[0][0]
 
         research_cursor.execute(
@@ -31,12 +34,16 @@ def scri_insert(results):
     date = datetime.now()
 
     for index, row in results.iterrows():
-        research_cursor.execute('''select id from dbo.VaccineHOIdefn where vaccine_id={} and hoidefn_id={}'''.format(row.vaccine, row.hoidefn))
+        # Vaccine에서 백신 종류랑 차수를 불러와야 됨
+        research_cursor.execute('''select id from dbo.Vaccine where vaccine_target_id={} and vcn_time={}'''.format(row.vaccine, row.vcntime))
+        vac_id = research_cursor.fetchall()[0][0]
+
+        research_cursor.execute('''select id from dbo.VaccineHOIdefn where vaccine_id={} and hoidefn_id={}'''.format(vac_id, row.hoidefn))
         vaccinehoidefn_id = research_cursor.fetchall()[0][0]
 
         research_cursor.execute(
             'INSERT INTO dbo.AnalysisResultsSCRI (is_deleted, created_time, updated_time, calculated_time, injected_case, risk_case, con_case, irr, irr_cutoff, vaccinehoidefn_id, studydesign_id) values (?,?,?,?,?,?,?,?,?,?,?)',
-            False, date, date, row.calculated_time, row.injected_case, row.risk_case, row.con_case, row.irr, 1, vaccinehoidefn_id, row.studydesign
+            False, date, date, row.calculated_date, row.injected_case, row.risk_case, row.con_case, row.irr, 1, vaccinehoidefn_id, row.studydesign
         )
 
         research_cnxn.commit()
@@ -50,12 +57,15 @@ def scri_sex_insert(results):
     date = datetime.now()
 
     for index, row in results.iterrows():
-        research_cursor.execute('''select id from dbo.VaccineHOIdefn where vaccine_id={} and hoidefn_id={}'''.format(row.vaccine, row.hoidefn))
+        research_cursor.execute('''select id from dbo.Vaccine where vaccine_target_id={} and vcn_time={}'''.format(row.vaccine, row.vcntime))
+        vac_id = research_cursor.fetchall()[0][0]
+
+        research_cursor.execute('''select id from dbo.VaccineHOIdefn where vaccine_id={} and hoidefn_id={}'''.format(vac_id, row.hoidefn))
         vaccinehoidefn_id = research_cursor.fetchall()[0][0]
 
         research_cursor.execute(
-            'INSERT INTO dbo.AnalysisResultsSCRI (is_deleted, created_time, updated_time, calculated_time, sex, irr, irr_cutoff, vaccinehoidefn_id, studydesign_id) values (?,?,?,?,?,?,?,?,?)',
-            False, date, date, row.calculated_time, row.sex, row.irr, 1, vaccinehoidefn_id, row.studydesign
+            'INSERT INTO dbo.AnalysisResultsSex (is_deleted, created_time, updated_time, calculated_time, sex, irr, irr_cutoff, vaccinehoidefn_id, studydesign_id) values (?,?,?,?,?,?,?,?,?)',
+            False, date, date, row.calculated_date, row.sex, row.irr, 1, vaccinehoidefn_id, row.studydesign
         )
 
         research_cnxn.commit()

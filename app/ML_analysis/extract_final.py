@@ -40,7 +40,10 @@ def extract_ml_input(target_total_pre, target_total, GNL2ATC):
 def extract_window(input_df, age_type):
     tmp = input_df.drop(['case', 'end_day', 'RN_INDI', 'start_day'], axis=1)
     input_cols = tmp.columns.tolist()
-    save_cols = ['case', 'end_day', 'RN_INDI', 'start_day', 'SEX', age_type, 'VCN']
+    if age_type =='EMPTY':
+        save_cols = ['case', 'end_day', 'RN_INDI', 'start_day', 'SEX', 'AGE', 'VCN']
+    else:
+        save_cols = ['case', 'end_day', 'RN_INDI', 'start_day', 'SEX', age_type, 'VCN']
     atc_cols = list(set(input_cols) - set(save_cols))
 
     target_atc = tmp[atc_cols]

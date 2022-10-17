@@ -78,13 +78,22 @@ class Join:
         drug_output_vac = self.VacDrug()
         # drug_output_vac['STD_YYYY'] = drug_output_vac.start_day.apply(lambda x: int(str(x)[:4]))
         self.bfc['RN_INDI'] = self.bfc['RN_INDI'].astype(int)
-        input_final_bfc = pd.merge(
-            drug_output_vac,
-            self.bfc[['RN_INDI', 'SEX', self.age_type]],
-            on=['RN_INDI'],
-            how='inner',
-            copy=False
-        )
+        if self.age_type == 'EMPTY':
+            input_final_bfc = pd.merge(
+                drug_output_vac,
+                self.bfc[['RN_INDI', 'SEX', 'AGE']],
+                on=['RN_INDI'],
+                how='inner',
+                copy=False
+            )
+        else:
+            input_final_bfc = pd.merge(
+                drug_output_vac,
+                self.bfc[['RN_INDI', 'SEX', self.age_type]],
+                on=['RN_INDI'],
+                how='inner',
+                copy=False
+            )
         # 추가 -중복 제거
         input_final_bfc = input_final_bfc.drop_duplicates()
         return input_final_bfc

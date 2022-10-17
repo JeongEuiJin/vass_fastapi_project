@@ -18,20 +18,22 @@ def run_ml_tasks(params: dict):
     :param params: 웹서버에서 파라미터 받아온걸 받는다
     :return:
     """
-    # table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
-    # ml_results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
-    # print (ml_results)
-    # ml_insert(ml_results)
+    table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
+    ml_results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
+    print (ml_results)
+    ml_insert(ml_results)
 
     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
-    scri_results = SCRI(params, table_HOI, bfc, death, vac)
-    print (scri_results)
+    scri_results, scri_sex_results = SCRI(params, table_HOI, bfc, death, vac)
+    print(scri_results)
     scri_insert(scri_results)
+    if len(scri_sex_results) != 0:
+        print(scri_sex_results)
+        scri_sex_insert(scri_sex_results)
+    else:
+        print('성별 분석 진행하지 않음.')
+        pass
 
-    table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
-    scri_sex_results = SCRI(params, table_HOI, bfc, death, vac)
-    print (scri_sex_results)
-    scri_sex_insert(scri_sex_results)
 
 
 
