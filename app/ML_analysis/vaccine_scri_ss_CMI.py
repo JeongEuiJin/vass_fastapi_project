@@ -371,9 +371,41 @@ def SCRI(research_dict, table_HOI, bfc_total, infrm_dth, vac):
     else:
         Result_df = pd.DataFrame()
 
-    ##########
+        ## 아래 DB 컬럼들 추가 ##
+    vaccine = research_dict['vaccine_target_id']
+    vcntme = research_dict['vcntime']
+    hoidefn = research_dict['hoidefn']
+    studydesign = research_dict['studydesignid']
 
-    return Result_df
+    if (gender == None):
+        results = ({
+            'studydesign': studydesign,
+            'vaccine': vaccine,
+            'vcntime': vcntme,
+            'hoidefn': hoidefn,
+            'calculated_date': Result_df.calculated_time + '-28',
+            'irr': Result_df.irr,
+            'irr_cutoff': Result_df.irr_cutoff,
+            'risk_case': Result_df.risk_case,
+            'con_case': Result_df.con_case,
+        })
+    else:
+        results = ({
+            'studydesign': studydesign,
+            'vaccine': vaccine,
+            'vcntime': vcntme,
+            'hoidefn': hoidefn,
+            'calculated_date': Result_df.calculated_time + '-28',
+            'irr': Result_df.irr,
+            'irr_cutoff': Result_df.irr_cutoff,
+            'risk_case': Result_df.risk_case,
+            'con_case': Result_df.con_case,
+            'sex': Result_df.sex
+        })
+
+    result_table = pd.DataFrame.from_dict(results)
+
+    return result_table
 
 #
 # if __name__ == '__main__':
