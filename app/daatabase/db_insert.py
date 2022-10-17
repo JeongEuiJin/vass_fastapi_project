@@ -17,7 +17,8 @@ def ml_insert(results):
         )
 
         # research_cursor.execute(
-        #     'UPDATE  FROM dbo.StudyDesign  '
+        #     'UPDATE dbo.StudyDesign SET _variable_ = NOT _variable_
+        #     where studydesign_id={}'.format()'
         # )
         research_cnxn.commit()
     research_cursor.close()

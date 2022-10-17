@@ -22,8 +22,7 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
     research_end_date = int(research_dict.research_end_date)
     window_size = int(research_dict.ml_window_size)
     age_type = research_dict.age_type
-    age_select_start = int(research_dict.age_select_start)
-    age_select_end = int(research_dict.age_select_end)
+
 
     # READ DATA
     HOI_patients = table_HOI.RN_INDI.tolist()
@@ -50,15 +49,23 @@ def ml_run(research_dict, table_HOI, vac, bfc, table20, table30, table60, GNL2AT
         bfc['AGE'] = (bfc['age_calcul'] / 365.25) + 1
         bfc['MONTH'] = bfc['age_calcul'] / 30.5
 
-        if age_type == 'AGE':
-            bfc = bfc.query('{}<=AGE<={}'.format(age_select_start, age_select_end))
-        elif age_type == 'MONTH':
-            bfc = bfc.query('{}<=MONTH<={}'.format(age_select_start, age_select_end))
-        elif age_type == 'WEEK':
-            bfc = bfc.query('{}<=WEEK<={}'.format(age_select_start, age_select_end))
+        if age_type == 'EMPTY':
+            bfc=bfc
         else:
-            # TODO : 유정샘 bfc 없으면 에러나오게 하는걸 추가해야될거같네요
-            pass
+            age_select_start = int(research_dict.age_select_start)
+            age_select_end = int(research_dict.age_select_end)
+
+            if age_type == 'AGE':
+                bfc = bfc.query('{}<=AGE<={}'.format(age_select_start, age_select_end))
+            elif age_type == 'MONTH':
+                bfc = bfc.query('{}<=MONTH<={}'.format(age_select_start, age_select_end))
+            elif age_type == 'WEEK':
+                bfc = bfc.query('{}<=WEEK<={}'.format(age_select_start, age_select_end))
+            elif age_type == 'EMPTY':
+                bfc = bfc
+            else:
+                # TODO : 유정샘 bfc 없으면 에러나오게 하는걸 추가해야될거같네요
+                pass
 
         # TODO 반영해서 추가한 부분입니다. 빈 bfc의 경우는 아래 문구가 프린트 됩니다.
         if bfc.empty:
