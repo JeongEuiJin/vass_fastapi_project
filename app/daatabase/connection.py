@@ -5,7 +5,6 @@ import pyodbc
 from app.common.config import conf
 
 
-# 저희의 경우 MSSQL server를 활용하기에 해당 드라이버를 활용했으나, 귀사의 서버 드라이버를 적용해 주시면 됩니다.
 def conn_db(_db_name):
     """
     연결할 디비 설정

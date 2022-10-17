@@ -63,23 +63,25 @@ def data_integrating(research_dict, table_HOI, bfc_total, infrm_dth, vac):
                                  on='RN_INDI')  # infrm_table 에 RN_INDI 이 같은 vac 데이터를 병합하여 vac_elig 에 저장함
 
     day_type = research_dict.age_type
-    day_strt = int(research_dict.age_select_start)
-    day_end = int(research_dict.age_select_end)
 
-    # day_type으로 받은 시간 단위를 기준으로, day_strt ~ day_end 사이의 나이에 해당하는 데이터 추출
-    # 나이는 vac_elig의 VCNYMD - birthdate 결과
-    # Ex. '주수' 선택, day_strt = 1, day_end = 3일 경우, 1주 ~ 3주 사이의 나이에 대항하는 데이터만 추출
-    if day_type == 'WEEK':  # 주수의 경우 weeks를 기준으로
-        vac_elig = vac_elig[(datetime.timedelta(weeks=day_strt) <= (vac_elig.VCNYMD - vac_elig.birthdate)) & (
-                (vac_elig.VCNYMD - vac_elig.birthdate) <= datetime.timedelta(weeks=day_end))]
-    elif day_type == 'MONTH':  # 개월 수의 경우에는 입력받은 값에 31을 곱한 기준으로
-        vac_elig = vac_elig[(datetime.timedelta(days=31 * day_strt) <= (vac_elig.VCNYMD - vac_elig.birthdate)) & (
-                (vac_elig.VCNYMD - vac_elig.birthdate) <= datetime.timedelta(days=31 * day_end))]
-    elif day_type == 'YEAR':  # 나이 수의 경우에는 입력받은 값에 365.25를 곱한 기준으로
-        vac_elig = vac_elig[(datetime.timedelta(days=365.25 * day_strt) <= (vac_elig.VCNYMD - vac_elig.birthdate)) & (
-                (vac_elig.VCNYMD - vac_elig.birthdate) <= datetime.timedelta(days=365.25 * day_end))]
-    else:
-        pass
+    if day_type != 'EMPTY': # 분석 연령 탭 - 제한 없음이 아닐 경우
+        day_strt = int(research_dict.age_select_start)
+        day_end = int(research_dict.age_select_end)
+
+        # day_type으로 받은 시간 단위를 기준으로, day_strt ~ day_end 사이의 나이에 해당하는 데이터 추출
+        # 나이는 vac_elig의 VCNYMD - birthdate 결과
+        # Ex. '주수' 선택, day_strt = 1, day_end = 3일 경우, 1주 ~ 3주 사이의 나이에 대항하는 데이터만 추출
+        if day_type == 'WEEK':  # 주수의 경우 weeks를 기준으로
+            vac_elig = vac_elig[(datetime.timedelta(weeks=day_strt) <= (vac_elig.VCNYMD - vac_elig.birthdate)) & (
+                    (vac_elig.VCNYMD - vac_elig.birthdate) <= datetime.timedelta(weeks=day_end))]
+        elif day_type == 'MONTH':  # 개월 수의 경우에는 입력받은 값에 31을 곱한 기준으로
+            vac_elig = vac_elig[(datetime.timedelta(days=31 * day_strt) <= (vac_elig.VCNYMD - vac_elig.birthdate)) & (
+                    (vac_elig.VCNYMD - vac_elig.birthdate) <= datetime.timedelta(days=31 * day_end))]
+        elif day_type == 'YEAR':  # 나이 수의 경우에는 입력받은 값에 365.25를 곱한 기준으로
+            vac_elig = vac_elig[(datetime.timedelta(days=365.25 * day_strt) <= (vac_elig.VCNYMD - vac_elig.birthdate)) & (
+                    (vac_elig.VCNYMD - vac_elig.birthdate) <= datetime.timedelta(days=365.25 * day_end))]
+        else:
+            pass
 
     disease_1 = table_HOI[['RN_INDI', 'diag_dt']]
     disease_1.RN_INDI = disease_1.RN_INDI.astype(int)  ############################### 추가 ***************************
@@ -153,13 +155,11 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
 
         # 백신 접종데이터에 Risk, Control window 일자를 추가한 data열 추가
         if (C3 == None) or (C4 == None):  # C3, C4에 입력 값이 없을 경우 조건문
-            date_window = list(range(R1, R2 + 1)) + list(
-                range(C1, C2 + 1))  # 위에서 지정한 R1 ~ R2, C1 ~ C2 두 구간의 모든 수들의 리스트 생성
+            date_window = list(range(R1, R2 + 1)) + list(range(C1, C2 + 1))  # 위에서 지정한 R1 ~ R2, C1 ~ C2 두 구간의 모든 수들의 리스트 생성
         else:  # C3, C4에 입력 값이 모두 있을 경우 조건문
             C3 = int(C3)  # research_dict 에서 가져옴*
             C4 = int(C4)
-            date_window = list(range(R1, R2 + 1)) + list(range(C1, C2 + 1)) + list(
-                range(C3, C4 + 1))  # 위에서 지정한 R1 ~ R2, C1 ~ C2, C3 ~ C4 세 구간의 모든 수들의 리스트 생성
+            date_window = list(range(R1, R2 + 1)) + list(range(C1, C2 + 1)) + list(range(C3, C4 + 1))  # 위에서 지정한 R1 ~ R2, C1 ~ C2, C3 ~ C4 세 구간의 모든 수들의 리스트 생성
         day_window = vac_diag5[['RN_INDI', 'VCNYMD']]  # vac_diag5 에서 해당 컬럼들 데이터를 day_window에 지정
 
         # day_window.RN_INDI = day_window.RN_INDI.astype(str)
@@ -179,7 +179,10 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
         day = pd.merge(left=vac_diag5, right=day_window_1, how="left", on=["RN_INDI", "VCNYMD"])
         day['date'] = day.VCNYMD  # day의 date 컬럼을 생성. VCNYMD 컬럼의 값을 똑같이 가짐
         for i in range(len(day)):  # day의 길이만큼 for루프 진행
-            day['date'][i] = day.VCNYMD[i] + datetime.timedelta(days=int(day.rep_window[i]))  # i번째 행의 date 컬럼 값에 (VCNYMD 컬럼값 + rep_window컬럼값)을 저장
+            if pd.isnull(day.rep_window[i])==True:
+                pass
+            else:
+                day['date'][i] = day.VCNYMD[i] + datetime.timedelta(days=int(day.rep_window[i]))  # i번째 행의 date 컬럼 값에 (VCNYMD 컬럼값 + rep_window컬럼값)을 저장
         day = day.drop(['rep_window'], axis=1)  # rep_window 컬럼을 버림
 
         # date - VCNYMD인 riskperiod열 추가 (Risk=1, control=2)
@@ -231,6 +234,7 @@ def scri_analysis_sex_type(research_dict, df_vac_diag, sex_type, strt_date, end_
 
 
 def scri_analysis(df, sex_type, Alz_date, vac_count):
+    print ('SCRI 분석 시작')
     df.reset_index(drop=True, inplace=True)
     # fu_stt에 date지정, fu_end에 date+1 지정
     scri = df[['RN_INDI', 'date', 'riskperiod', 'outcome']]  # df 에서 해당 컬럼들 데이터를 scri 에 지정
@@ -288,6 +292,7 @@ def scri_analysis(df, sex_type, Alz_date, vac_count):
     scri4['riskperiod_0'] = 1 - scri4.riskperiod  # scri4에 riskperiod_0 컬럼을 생성하며 1 - riskperiod 값을 가짐
     scri4['riskperiod_1'] = scri4.riskperiod  # scri4에 riskperiod_0 컬럼을 생성하며 riskperiod 값을 가짐
 
+    print ('irr 계산 시작')
     fam = sm.families.Poisson(sm.families.links.log())
     ind = sm.cov_struct.Independence()
 
@@ -365,6 +370,8 @@ def SCRI(research_dict, table_HOI, bfc_total, infrm_dth, vac):
                                            end_date=int(research_dict.research_end_date))
     else:
         Result_df = pd.DataFrame()
+
+    ##########
 
     return Result_df
 
