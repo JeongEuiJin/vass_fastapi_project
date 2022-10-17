@@ -19,11 +19,6 @@ def run_ml_tasks(params: dict):
     :return:
     """
     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
-    ml_results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
-    print (ml_results)
-    ml_insert(ml_results)
-
-    table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
     scri_results, scri_sex_results = SCRI(params, table_HOI, bfc, death, vac)
     print(scri_results)
     scri_insert(scri_results)
@@ -33,6 +28,13 @@ def run_ml_tasks(params: dict):
     else:
         print('성별 분석 진행하지 않음.')
         pass
+
+    table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
+    ml_results = ml_run(params, table_HOI, vac, bfc, table20, table30, table60, GNL2ATC)
+    print (ml_results)
+    ml_insert(ml_results)
+
+    print ('분석이 전부 완료되었습니다.')
 
 
 
