@@ -70,6 +70,8 @@ def scri_sex_insert(results):
 
         research_cursor.execute(
             '''UPDATE dbo.StudyDesign SET study_design_run = 'true' where id={}'''.format(row.studydesign))
+
+        research_cnxn.commit()
     research_cursor.close()
 
     print('AnalysisResultsSex 로의 쓰기가 완료되었습니다.')
