@@ -19,7 +19,7 @@ def ml_insert(results_ml):
             False, date, date, row.calculated_date, row.injected_case, row.risk_case, row.fi_ratio, vaccinehoidefn_id, row.studydesign
         )
 
-        research_cursor.execute('''UPDATE dbo.StudyDesign SET study_design_run = 'true' where id={}'''.format(row.studydesign))
+        research_cursor.execute('''UPDATE dbo.StudyDesign SET running_status = 'true' where id={}'''.format(row.studydesign))
 
         research_cnxn.commit()
     research_cursor.close()
@@ -44,7 +44,7 @@ def scri_insert(results):
             False, date, date, row.calculated_date, row.injected_case, row.risk_case, row.con_case, row.irr, 1, vaccinehoidefn_id, row.studydesign
         )
         research_cursor.execute(
-            '''UPDATE dbo.StudyDesign SET study_design_run = 'true' where id={}'''.format(row.studydesign))
+            '''UPDATE dbo.StudyDesign SET running_status = 'true' where id={}'''.format(row.studydesign))
 
         research_cnxn.commit()
     research_cursor.close()
@@ -69,7 +69,7 @@ def scri_sex_insert(results):
         )
 
         research_cursor.execute(
-            '''UPDATE dbo.StudyDesign SET study_design_run = 'true' where id={}'''.format(row.studydesign))
+            '''UPDATE dbo.StudyDesign SET running_status = 'true' where id={}'''.format(row.studydesign))
 
         research_cnxn.commit()
     research_cursor.close()

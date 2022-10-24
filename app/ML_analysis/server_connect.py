@@ -12,6 +12,9 @@ def connect_db(research_dict: dict):
     vcncd = int(research_dict.vaccine_target_id)  # 백신종류
     vcntme = int(research_dict.vcntime)  # 백신차수
 
+    # 조작적 정의 sql query 읽기
+    hoi_sql = research_dict.operationaldefinition_query
+
     # 조작적 정의 DB 연결
     research_cnxn = conn_db('VASS_DATA')
     data_cnxn = conn_db('VASS_DATA')
