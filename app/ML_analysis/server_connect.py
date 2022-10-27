@@ -1,4 +1,5 @@
 import pandas as pd
+from time import sleep
 
 from app.daatabase.connection import conn_db
 
@@ -14,14 +15,30 @@ def connect_db(research_dict: dict):
 
     # 조작적 정의 sql query 읽기
     hoi_sql = research_dict.operationaldefinition_query
+    hoi_sql = hoi_sql.replace('\n',' ')
+    print('조작적 정의 데이터 추출 중')
+    sleep(120)
 
     # 조작적 정의 DB 연결
     research_cnxn = conn_db('VASS_DATA')
     data_cnxn = conn_db('VASS_DATA')
+    research_cursor = research_cnxn.cursor()
 
     with research_cnxn:
-        table_HOI = 'SELECT * FROM dbo.example where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date)  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
+        research_cursor.execute(hoi_sql)
+        query="select top 1 table_name from (select schema_name(schema_id) as schema_name, name as table_name,create_date from sys.tables where create_date > DATEADD(DAY, -30, CURRENT_TIMESTAMP))v order by create_date desc;"
+        research_cursor.execute(query)
+        table_HOI_name = research_cursor.fetchall()[0][0]
+        table_HOI = 'SELECT * FROM dbo.{} where MDCARE_STRT_DT between {} and {}'.format(table_HOI_name, research_start_date,
+                                                                                         research_end_date)
+
+        # with research_cnxn:
+    #     table_HOI = 'SELECT * FROM dbo.tmp_core_hsptz_111687198 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date)  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
         table_HOI = pd.read_sql(table_HOI, research_cnxn)
+        table_HOI.rename(columns={'rn_indi':'RN_INDI','rn_key':'RN_KEY'}, inplace=True)
+        drop_table_HOI = 'drop table dbo.{}'.format(table_HOI_name)
+        research_cursor.execute(drop_table_HOI)
+        research_cursor.commit()
         print('Table_HOI')
 
     with data_cnxn:
