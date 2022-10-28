@@ -31,6 +31,9 @@ def conn_db(_db_name):
 
     # DB 연결
     _url = 'DRIVER={' + driver + '};SERVER=' + server + ',' + port + ';DATABASE=' + _db_name + ';UID=' + user + ';PWD=' + password
+    print("\n\n")
+    print("conn_db _URL :: ", _url)
+    print("\n\n")
     return pyodbc.connect(_url)
 
 
@@ -55,4 +58,7 @@ def conn_web_db():
     # 패스워드
     password = database_config['PASSWORD']
     _url = 'DRIVER={' + driver + '};SERVER=' + server + ';DATABASE=' + database + ';UID=' + user + ';PWD=' + password
+    print("\n\n")
+    print("conn_web_db _URL :: ", _url)
+    print("\n\n")
     return pyodbc.connect(_url)
