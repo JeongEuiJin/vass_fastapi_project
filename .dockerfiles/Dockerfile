@@ -33,7 +33,7 @@ RUN         echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.zshrc
 
 # pyenv virtualenv
 
-RUN         pyenv virtualenv 3.8.13 deploy_docker
+RUN         pyenv virtualenv 3.8.13 vass_fastapi_env
 
 # pyodbc mssql을 사용하기위해 아래 패키지 설치
 RUN         apt-get -y install software-properties-common
@@ -52,7 +52,7 @@ RUN         apt-get -y install unixodbc-dev
 
 COPY        . /app
 
-RUN         /root/.pyenv/versions/deploy_docker/bin/pip install --no-cache-dir -r /app/.requirements/deploy.txt
+RUN         /root/.pyenv/versions/vass_fastapi_env/bin/pip install --no-cache-dir -r /app/.requirements/deploy.txt
 
 ENV         LC_ALL=C.UTF-8
 ENV         LANG=C.UTF-8
