@@ -28,9 +28,9 @@ else:
     web_concurrency = max(int(default_web_concurrency), 2)
     if use_max_workers:
         web_concurrency = min(web_concurrency, use_max_workers)
-accesslog_var = os.getenv("ACCESS_LOG", "-")
+accesslog_var = os.getenv("ACCESS_LOG", "/tmp/accesslog_var.log")
 use_accesslog = accesslog_var or None
-errorlog_var = os.getenv("ERROR_LOG", "-")
+errorlog_var = os.getenv("ERROR_LOG", "/tmp/errorlog_var.log")
 use_errorlog = errorlog_var or None
 graceful_timeout_str = os.getenv("GRACEFUL_TIMEOUT", "120")
 timeout_str = os.getenv("TIMEOUT", "120")
