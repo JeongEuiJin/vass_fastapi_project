@@ -19,6 +19,7 @@ def run_ml_tasks(params: dict):
     :return:
     """
     table_HOI, vac, bfc, table20, table30, table60, GNL2ATC, death = connect_db(params)
+    print ('SCRI 분석 시작')
     scri_results, scri_sex_results = SCRI(params, table_HOI, bfc, death, vac)
     print(scri_results)
     scri_insert(scri_results)

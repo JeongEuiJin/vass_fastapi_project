@@ -33,7 +33,7 @@ def connect_db(research_dict: dict):
                                                                                          research_end_date)
 
         # with research_cnxn:
-    #     table_HOI = 'SELECT * FROM dbo.tmp_core_hsptz_111687198 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date)  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
+        # table_HOI = 'SELECT * FROM dbo.tmp_core_hsptz_335552554 where MDCARE_STRT_DT between {} and {}'.format(research_start_date, research_end_date)  # 선택한 HOI에 해당하는 쿼리가 돌아간 결과가 저장된 테이블명을 넣어주시면 됩니다.
         table_HOI = pd.read_sql(table_HOI, research_cnxn)
         table_HOI.rename(columns={'rn_indi':'RN_INDI','rn_key':'RN_KEY'}, inplace=True)
         drop_table_HOI = 'drop table dbo.{}'.format(table_HOI_name)

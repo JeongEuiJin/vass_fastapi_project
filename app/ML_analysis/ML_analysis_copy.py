@@ -41,17 +41,16 @@ class ML_run:
 
             # ---model running---#
             # grid search start
-            # setting할 parameter들을 나열함 (parameter명은 파이썬 패키지 내 정해져있는 이름입니다. Java에서 가능한 모듈을 찾아서 알려주시면 제가 보고 parameter명을 알려드리겠습니다.)
-            # params_grid = {
-            # 'n_estimators': [100, 200, 300],
-            # 'max_depth': [10, 15, 20, 25],
-            # 'criterion': ('gini', 'entropy')
-            # }
-
             params_grid = {
-                'n_estimators': [100, 300],
-                'max_depth': [10, 20]
+            'n_estimators': [100, 200, 300],
+            'max_depth': [10, 15, 20, 25],
+            'criterion': ('gini', 'entropy')
             }
+
+            # params_grid = {
+            #     'n_estimators': [100, 300],
+            #     'max_depth': [10, 20]
+            # }
 
             model = RandomForestClassifier()  # random forest 모델을 불러옵니다.
             grid_search = GridSearchCV(
